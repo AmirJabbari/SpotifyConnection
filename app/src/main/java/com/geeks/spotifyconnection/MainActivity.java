@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String REDIRECT_URI = "my-awesome-app-login://callback";
     private static final String CLIENT_ID = "4828bb77a76a498bb9268b7d71cc296c";
     private static final int REQUEST_CODE = 1337;
-
+    private SpotifyAppRemote mSpotifyAppRemote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,25 @@ public class MainActivity extends AppCompatActivity {
                 // Response was successful and contains auth token
                 case TOKEN:
                     // Handle successful response
+                    ConnectionParams connectionParams =
+                            new ConnectionParams.Builder(CLIENT_ID)
+                                    .setRedirectUri(REDIRECT_URI)
+                                    .showAuthView(true)
+                                    .build();
+                    SpotifyAppRemote.connect(this, connectionParams, new Connector.ConnectionListener() {
+                                @Override
+                                public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+                                    Log.e("MainActivity", "Connected");
+                                    mSpotifyAppRemote = spotifyAppRemote;
+                                    connected();
+                                }
+                                @Override
+                                public void onFailure(Throwable error) {
+                                    Log.e("MainActivity", error.getMessage().toString());
 
+                                }
+                            }
+                    );
 
                     break;
 
@@ -64,6 +82,19 @@ public class MainActivity extends AppCompatActivity {
                     // Handle other cases
             }
         }
+    }
+
+    private void connected() {
+        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:6fkvGGXL7TCnEd0I5qHHUx");
+        // Subscribe to PlayerState
+        mSpotifyAppRemote.getPlayerApi()
+                .subscribeToPlayerState()
+                .setEventCallback(playerState -> {
+                    final Track track = playerState.track;
+                    if (track != null) {
+                        Log.d("MainActivity", track.name + " by " + track.artist.name);
+                    }
+                });
     }
 
 }
