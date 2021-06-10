@@ -6,7 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -20,11 +23,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "4828bb77a76a498bb9268b7d71cc296c";
     private static final int REQUEST_CODE = 1337;
     private SpotifyAppRemote mSpotifyAppRemote;
+    public static String BASE_IMG_URL="https://i.scdn.co/image/";
+    ImageView trackImage;
+    TextView txtTrackName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        trackImage=findViewById(R.id.imgTrackCover);
+        txtTrackName=findViewById(R.id.txtTrackName);
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
@@ -85,13 +93,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connected() {
-        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:6fkvGGXL7TCnEd0I5qHHUx");
+        mSpotifyAppRemote.getPlayerApi().play("spotify:album:4l1MLKyDun3edi5lrDwtZG?si=e6n6W-0FREGxDRlpw9");
         // Subscribe to PlayerState
         mSpotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
                     final Track track = playerState.track;
                     if (track != null) {
+                        String imageId=track.imageUri.raw;
+                        imageId=imageId.replace("spotify:image:","");
+                      String url= BASE_IMG_URL+imageId;
+                        Glide.with(this).load(url).into(trackImage);
+                        txtTrackName.setText(track.name);
                         Log.d("MainActivity", track.name + " by " + track.artist.name);
                     }
                 });
