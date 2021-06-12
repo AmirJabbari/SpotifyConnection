@@ -17,5 +17,11 @@ public class PrefManager {
         pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = pref.edit();
     }
-
+    public void setAccessToken(String token){
+        editor.putString("token",token);
+        editor.commit();
+    }
+    public String getAccessToken(){
+        return pref.getString("token","null");
+    }
 }

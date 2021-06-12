@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.geeks.spotifyconnection.config.PrefManager;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static String BASE_IMG_URL="https://i.scdn.co/image/";
     ImageView trackImage;
     TextView txtTrackName;
+    PrefManager prefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+
+        prefManager=new PrefManager(getApplicationContext());
     }
 
     @Override
@@ -50,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
-
             switch (response.getType()) {
                 // Response was successful and contains auth token
                 case TOKEN:
+                    prefManager.setAccessToken(response.getAccessToken());
                     // Handle successful response
                     ConnectionParams connectionParams =
                             new ConnectionParams.Builder(CLIENT_ID)
